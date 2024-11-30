@@ -4,6 +4,8 @@ from typing import Dict
 from dotenv import load_dotenv
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
+from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
+from prometheus_fastapi_instrumentator import Instrumentator
 
 from routers.reservation import reservation_router
 from utils.database_config import DatabaseConfig
@@ -27,6 +29,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan, title="예약 API", version="ver.1")
 
 app.include_router(reservation_router, prefix="/api/v1/reservations")
+
+@app.get("/health", status_code=status.HTTP_200_OK)
+async def health_check() -> dict:
+    return {"status" : "ok"}
+
+FastAPIInstrumentor.instrument_app(app)
+
+instrumentator = Instrumentator()
+instrumentator.instrument(app).expose(app)
+
 
 app.add_middleware(
     CORSMiddleware,
