@@ -87,7 +87,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: build_and_push
     env:
-      FILE_PATH: spaces/${{ github.ref_name }}/deployment.yaml
+      FILE_PATH: reservation/${{ github.ref_name }}/deployment.yaml
       IMAGE_FULL_NAME: ${{ secrets.ECR_REGISTRY }}/${{ secrets.ECR_REPOSITORY }}:${{ github.sha }}
       COMMIT_ID: ${{ github.sha }}
     steps:
