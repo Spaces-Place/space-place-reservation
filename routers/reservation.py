@@ -5,29 +5,38 @@ from sqlmodel import select
 
 from enums.reservation_type import ReservationStatus
 from models.reservation import Reservation
-from schemas.reservation import ReservationRequest, OrderNumberRequest, UpdatePaymentIdRequest
+from schemas.reservation import (
+    ReservationRequest,
+    OrderNumberRequest,
+    UpdatePaymentIdRequest,
+)
 from utils.authenticate import userAuthenticate
 from utils.mysqldb import get_mysql_session
 
 
 reservation_router = APIRouter(tags=["예약"])
 
+
 @reservation_router.post(
     "/kakao/ready",
     response_model=Dict,
     status_code=status.HTTP_200_OK,
-    summary="예약 결제 준비"
+    summary="예약 결제 준비",
 )
 async def get_order_number(
     data: ReservationRequest,
     session=Depends(get_mysql_session),
-    token_info=Depends(userAuthenticate)
+    token_info=Depends(userAuthenticate),
 ):
     """구현이 필요하지 않습니다."""
     now = datetime.now()
     order_prefix = now.strftime("%Y%m%d%H%M%S")
 
-    statement = select(Reservation).where(Reservation.order_number.like(f"{order_prefix}%")).order_by(Reservation.order_number.desc())
+    statement = (
+        select(Reservation)
+        .where(Reservation.order_number.like(f"{order_prefix}%"))
+        .order_by(Reservation.order_number.desc())
+    )
     result = await session.execute(statement)
     last_order = result.scalar()
 
@@ -38,11 +47,11 @@ async def get_order_number(
         order_number = f"{order_prefix}0000"
 
     new_reservation = Reservation(
-        order_number = order_number, 
-        space_id = data.space_id,
-        user_id = token_info["user_id"],
-        use_date = data.use_date,
-        r_status = ReservationStatus.PENDING
+        order_number=order_number,
+        space_id=data.space_id,
+        user_id=token_info["user_id"],
+        use_date=data.use_date,
+        r_status=ReservationStatus.PENDING,
     )
     session.add(new_reservation)
     await session.commit()
@@ -52,15 +61,17 @@ async def get_order_number(
 @reservation_router.patch(
     "/kakao/ready",
     status_code=status.HTTP_204_NO_CONTENT,
-    summary="결제 준비 번호 업데이트"
+    summary="결제 준비 번호 업데이트",
 )
 async def update_payment_id(
     update_request: UpdatePaymentIdRequest,
     session=Depends(get_mysql_session),
-    token_info=Depends(userAuthenticate)
+    token_info=Depends(userAuthenticate),
 ):
     """구현이 필요하지 않습니다."""
-    statement = select(Reservation).filter(Reservation.order_number == update_request.order_number)
+    statement = select(Reservation).filter(
+        Reservation.order_number == update_request.order_number
+    )
     result = await session.execute(statement)
     reservation = result.scalars().first()
     if reservation:
@@ -73,18 +84,19 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+
 @reservation_router.patch(
-    "/kakao/approve",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="예약 완료 처리"
+    "/kakao/approve", status_code=status.HTTP_204_NO_CONTENT, summary="예약 완료 처리"
 )
 async def update_payment_id(
     approve_request: OrderNumberRequest,
     token_info=Depends(userAuthenticate),
-    session=Depends(get_mysql_session)
+    session=Depends(get_mysql_session),
 ):
     """구현이 필요하지 않습니다."""
-    statement = select(Reservation).filter(Reservation.order_number == approve_request.order_number)
+    statement = select(Reservation).filter(
+        Reservation.order_number == approve_request.order_number
+    )
     result = await session.execute(statement)
     reservation = result.scalars().first()
     if reservation:
@@ -96,18 +108,19 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+
 @reservation_router.patch(
-    "/kakao/fail",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="예약 실패 처리"
+    "/kakao/fail", status_code=status.HTTP_204_NO_CONTENT, summary="예약 실패 처리"
 )
 async def update_payment_id(
     fail_request: OrderNumberRequest,
     token_info=Depends(userAuthenticate),
-    session=Depends(get_mysql_session)
+    session=Depends(get_mysql_session),
 ):
     """구현이 필요하지 않습니다."""
-    statement = select(Reservation).filter(Reservation.order_number == fail_request.order_number)
+    statement = select(Reservation).filter(
+        Reservation.order_number == fail_request.order_number
+    )
     result = await session.execute(statement)
     reservation = result.scalars().first()
     if reservation:
@@ -119,18 +132,19 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+
 @reservation_router.patch(
-    "/kakao/fail",
-    status_code=status.HTTP_204_NO_CONTENT,
-    summary="예약 취소 처리"
+    "/kakao/fail", status_code=status.HTTP_204_NO_CONTENT, summary="예약 취소 처리"
 )
 async def update_payment_id(
     cancel_request: OrderNumberRequest,
     token_info=Depends(userAuthenticate),
-    session=Depends(get_mysql_session)
+    session=Depends(get_mysql_session),
 ):
     """구현이 필요하지 않습니다."""
-    statement = select(Reservation).filter(Reservation.order_number == cancel_request.order_number)
+    statement = select(Reservation).filter(
+        Reservation.order_number == cancel_request.order_number
+    )
     result = await session.execute(statement)
     reservation = result.scalars().first()
     if reservation:
