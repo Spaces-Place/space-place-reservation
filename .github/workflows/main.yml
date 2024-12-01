@@ -15,7 +15,7 @@ on:
 env:
   PYTHON_VERSION: 3.12.7
   LINTING_TARGET_VERSION: py312
-  SERVICE_NAME: payments
+  SERVICE_NAME: "payments"
 
 jobs:
   lint:
