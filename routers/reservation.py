@@ -1,9 +1,11 @@
 from datetime import datetime
+import token
 from typing import Dict
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import select
 
 from enums.reservation_type import ReservationStatus
+from models import reservation
 from models.reservation import Reservation
 from schemas.reservation import ReservationRequest, OrderNumberRequest, UpdatePaymentIdRequest
 from utils.authenticate import userAuthenticate
@@ -11,6 +13,24 @@ from utils.mysqldb import get_mysql_session
 
 
 reservation_router = APIRouter(tags=["예약"])
+
+@reservation_router.get(
+    "",
+    response_model=Dict,
+    status_code=status.HTTP_200_OK,
+    summary="예약 목록 확인"
+)
+async def get_reservations(
+    session=Depends(get_mysql_session),
+    token_info=Depends(userAuthenticate)
+):
+    statement = select(Reservation).where(Reservation.user_id == token_info["user_id"])
+    result = await session.execute(statement)
+    reservations = result.scalars().all()
+
+    print(token_info["user_id"])
+
+    return {"reservations": reservations}
 
 @reservation_router.post(
     "/kakao/ready",
