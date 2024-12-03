@@ -62,7 +62,9 @@ async def get_order_number(
         new_reservation = Reservation(
             order_number = order_number, 
             space_id = data.space_id,
+            space_name = data.space_name,
             user_id = token_info["user_id"],
+            user_name = data.user_name,
             use_date = data.use_date,
             r_status = ReservationStatus.PENDING
         )
@@ -70,7 +72,9 @@ async def get_order_number(
         new_reservation = Reservation(
             order_number = order_number, 
             space_id = data.space_id,
+            space_name = data.space_name,
             user_id = token_info["user_id"],
+            user_name = data.user_name,
             start_time = data.start_time,
             end_time = data.end_time,
             r_status = ReservationStatus.PENDING
