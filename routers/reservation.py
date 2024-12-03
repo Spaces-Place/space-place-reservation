@@ -57,13 +57,25 @@ async def get_order_number(
     else:
         order_number = f"{order_prefix}0000"
 
-    new_reservation = Reservation(
-        order_number = order_number, 
-        space_id = data.space_id,
-        user_id = token_info["user_id"],
-        use_date = data.use_date,
-        r_status = ReservationStatus.PENDING
-    )
+    new_reservation = None
+    if data.use_date:
+        new_reservation = Reservation(
+            order_number = order_number, 
+            space_id = data.space_id,
+            user_id = token_info["user_id"],
+            use_date = data.use_date,
+            r_status = ReservationStatus.PENDING
+        )
+    else:
+        new_reservation = Reservation(
+            order_number = order_number, 
+            space_id = data.space_id,
+            user_id = token_info["user_id"],
+            start_time = data.start_time,
+            end_time = data.end_time,
+            r_status = ReservationStatus.PENDING
+        )
+
     session.add(new_reservation)
     await session.commit()
     return {"order_number": order_number}

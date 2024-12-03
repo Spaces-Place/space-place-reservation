@@ -13,5 +13,5 @@ class Reservation(SQLModel, table=True):
     r_status: ReservationStatus
     reservation_date: datetime = Field(default_factory=datetime.now)
     use_date: datetime
-    start_time: time
-    end_time: time
+    start_time: datetime
+    end_time: datetime
