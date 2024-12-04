@@ -7,12 +7,13 @@ from sqlmodel import select
 from enums.reservation_type import ReservationStatus
 from models import reservation
 from models.reservation import Reservation
+from routers.logging_router import LoggingAPIRoute
 from schemas.reservation import ReservationRequest, OrderNumberRequest, UpdatePaymentIdRequest
 from utils.authenticate import userAuthenticate
 from utils.mysqldb import get_mysql_session
 
 
-reservation_router = APIRouter(tags=["예약"])
+reservation_router = APIRouter(tags=["예약"], route_class=LoggingAPIRoute)
 
 @reservation_router.get(
     "",
