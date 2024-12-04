@@ -29,8 +29,6 @@ async def get_reservations(
     result = await session.execute(statement)
     reservations = result.scalars().all()
 
-    print(token_info["user_id"])
-
     return {"reservations": reservations}
 
 @reservation_router.post(
