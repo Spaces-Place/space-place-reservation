@@ -1,11 +1,9 @@
 from datetime import datetime
-import token
 from typing import Dict
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import select
 
 from enums.reservation_type import ReservationStatus
-from models import reservation
 from models.reservation import Reservation
 from routers.logging_router import LoggingAPIRoute
 from schemas.reservation import ReservationRequest, OrderNumberRequest, UpdatePaymentIdRequest
@@ -22,10 +20,12 @@ reservation_router = APIRouter(tags=["예약"], route_class=LoggingAPIRoute)
     summary="예약 목록 확인"
 )
 async def get_reservations(
+    skip: int = Query(default=0, ge=0),
+    limit: int = Query(default=10, ge=1, le=100),
     session=Depends(get_mysql_session),
     token_info=Depends(userAuthenticate)
 ):
-    statement = select(Reservation).where(Reservation.user_id == token_info["user_id"])
+    statement = select(Reservation).where(Reservation.user_id == token_info["user_id"]).offset(skip).limit(limit)
     result = await session.execute(statement)
     reservations = result.scalars().all()
 
