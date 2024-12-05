@@ -15,7 +15,11 @@ from utils.logger import Logger
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # 애플리케이션 시작될 때 실행할 코드
-    env_type = '.env.development' if os.getenv('APP_ENV') == 'development' else '.env.production'
+    env_type = (
+        ".env.development"
+        if os.getenv("APP_ENV") == "development"
+        else ".env.production"
+    )
     load_dotenv(env_type)
 
     database = DatabaseConfig().create_database()
@@ -31,10 +35,12 @@ app = FastAPI(lifespan=lifespan, title="예약 API", version="ver.1")
 
 app.include_router(reservation_router, prefix="/api/v1/reservations")
 
+
 @app.get("/health", status_code=status.HTTP_200_OK)
 async def health_check(logger: Logger = Depends(Logger.setup_logger)) -> dict:
     logger.info("health check")
-    return {"status" : "ok"}
+    return {"status": "ok"}
+
 
 FastAPIInstrumentor.instrument_app(app)
 
