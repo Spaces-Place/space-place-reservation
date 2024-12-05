@@ -1,12 +1,12 @@
-from dataclasses import dataclass
 import os
 
 from utils.aws_ssm import ParameterStore
 from utils.env_config import get_env_config
+from utils.logger import Logger
 from utils.mysqldb import MySQLDatabase
 from utils.type.db_config_type import DBConfig
 
-    
+
 class DatabaseConfig:
 
     _instance = None
@@ -14,7 +14,7 @@ class DatabaseConfig:
     def __new__(cls):
         if cls._instance is None:
             cls._instance = super(DatabaseConfig, cls).__new__(cls)
-
+            cls._logger = Logger.setup_logger()
         return cls._instance
 
     """
