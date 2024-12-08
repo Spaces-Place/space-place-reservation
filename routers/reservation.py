@@ -46,6 +46,7 @@ async def get_order_number(
     now = datetime.now()
     order_prefix = now.strftime("%Y%m%d%H%M%S")
 
+    # 전날~오늘 검색 조건 추가 시 성능 향상 기대
     statement = select(Reservation).where(Reservation.order_number.like(f"{order_prefix}%")).order_by(Reservation.order_number.desc())
     result = await session.execute(statement)
     last_order = result.scalar()
@@ -84,6 +85,7 @@ async def get_order_number(
     return {"order_number": order_number}
 
 
+# payment_id 업데이트
 @reservation_router.patch(
     "/kakao/ready",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -95,6 +97,7 @@ async def update_payment_id(
     token_info=Depends(userAuthenticate)
 ):
     """구현이 필요하지 않습니다."""
+    # 전날~오늘 검색 조건 추가 시 성능 향상 기대
     statement = select(Reservation).filter(Reservation.order_number == update_request.order_number)
     result = await session.execute(statement)
     reservation = result.scalars().first()
@@ -108,6 +111,7 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+# r_status = COMPLETED
 @reservation_router.patch(
     "/kakao/approve",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -119,6 +123,7 @@ async def update_payment_id(
     session=Depends(get_mysql_session)
 ):
     """구현이 필요하지 않습니다."""
+    # 전날~오늘 검색 조건 추가 시 성능 향상 기대
     statement = select(Reservation).filter(Reservation.order_number == approve_request.order_number)
     result = await session.execute(statement)
     reservation = result.scalars().first()
@@ -131,6 +136,7 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+# r_status = FAILED
 @reservation_router.patch(
     "/kakao/fail",
     status_code=status.HTTP_204_NO_CONTENT,
@@ -142,6 +148,7 @@ async def update_payment_id(
     session=Depends(get_mysql_session)
 ):
     """구현이 필요하지 않습니다."""
+    # 전날~오늘 검색 조건 추가 시 성능 향상 기대
     statement = select(Reservation).filter(Reservation.order_number == fail_request.order_number)
     result = await session.execute(statement)
     reservation = result.scalars().first()
@@ -154,8 +161,9 @@ async def update_payment_id(
             detail="일치하는 주문번호가 존재하지 않습니다.",
         )
 
+# r_status = CANCELED
 @reservation_router.patch(
-    "/kakao/fail",
+    "/kakao/cancel",
     status_code=status.HTTP_204_NO_CONTENT,
     summary="예약 취소 처리"
 )
@@ -165,11 +173,12 @@ async def update_payment_id(
     session=Depends(get_mysql_session)
 ):
     """구현이 필요하지 않습니다."""
+    # 전날~오늘 검색 조건 추가 시 성능 향상 기대
     statement = select(Reservation).filter(Reservation.order_number == cancel_request.order_number)
     result = await session.execute(statement)
     reservation = result.scalars().first()
     if reservation:
-        reservation.r_status = ReservationStatus.FAILED
+        reservation.r_status = ReservationStatus.CANCELED
         await session.commit()
     else:
         raise HTTPException(
