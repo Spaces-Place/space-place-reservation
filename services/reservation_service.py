@@ -11,8 +11,8 @@ from utils.logger import Logger
 
 
 class ReservationService:
-    
-    def __init__(self, kafka_config: KafkaConfig , logger: Logger):
+
+    def __init__(self, kafka_config: KafkaConfig, logger: Logger):
         self.kafka_config = kafka_config
         self._logger = logger
         self._ready_approval_topic = "reservation.ready.approval"
@@ -23,12 +23,12 @@ class ReservationService:
         self.topic_handlers = {
             self._ready_approval_topic: self.ready_approval,
             self._ready_fail_topic: self.ready_fail,
-            self._payment_approval_topic: self.start_payment_approval
+            self._payment_approval_topic: self.start_payment_approval,
         }
         self.consumer_groups = {
             self._ready_approval_topic: "reservation_group",
             self._ready_fail_topic: "reservation_group",
-            self._payment_approval_topic: "reservation_group"
+            self._payment_approval_topic: "reservation_group",
         }
 
     async def initialize_consumers(self):
@@ -37,14 +37,13 @@ class ReservationService:
             self.kafka_config.start_consumer(
                 topic=topic,
                 group_id=group_id,
-                message_handler=self.topic_handlers[topic]
+                message_handler=self.topic_handlers[topic],
             )
 
         self._logger.info(f"컨슈머 초기화 토픽: {topic}, 그룹: {group_id}")
-        
+
         # 메세지 소비 시작
         await self.kafka_config.start_consuming()
-
 
     # sub: 결제 준비 완료
     async def ready_approval(self, message: str):
@@ -53,7 +52,9 @@ class ReservationService:
             data = json.loads(message)
 
             async for session in get_mysql_session():
-                statement = select(Reservation).filter(Reservation.order_number == data.get("order_number"))
+                statement = select(Reservation).filter(
+                    Reservation.order_number == data.get("order_number")
+                )
                 result = await session.execute(statement)
                 payment = result.scalars().first()
 
@@ -76,7 +77,9 @@ class ReservationService:
             data = json.loads(message)
 
             async for session in get_mysql_session():
-                statement = select(Reservation).filter(Reservation.order_number == data.get("order_number"))
+                statement = select(Reservation).filter(
+                    Reservation.order_number == data.get("order_number")
+                )
                 result = await session.execute(statement)
                 reservation = result.scalars().first()
 
@@ -99,7 +102,9 @@ class ReservationService:
             data = json.loads(message)
 
             async for session in get_mysql_session():
-                statement = select(Reservation).filter(Reservation.order_number == data.get("order_number"))
+                statement = select(Reservation).filter(
+                    Reservation.order_number == data.get("order_number")
+                )
                 result = await session.execute(statement)
                 reservation = result.scalars().first()
 
@@ -115,5 +120,9 @@ class ReservationService:
         except Exception as e:
             self._logger.error(f"예약 정보 업데이트 중 오류가 발생했습니다: {e}")
 
-async def get_reservation_service(kafka_config: KafkaConfig = Depends(get_kafka), logger: Logger = Depends(Logger.setup_logger)):
+
+async def get_reservation_service(
+    kafka_config: KafkaConfig = Depends(get_kafka),
+    logger: Logger = Depends(Logger.setup_logger),
+):
     return ReservationService(kafka_config, logger)
