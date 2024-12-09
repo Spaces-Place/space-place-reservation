@@ -75,7 +75,7 @@ async def get_order_number(
         "user_id": token_info["user_id"],
         "user_name": data.user_name,
         "r_status": ReservationStatus.PENDING,
-        "reservation_date": now
+        "reservation_date": now,
     }
 
     if data.use_date:
