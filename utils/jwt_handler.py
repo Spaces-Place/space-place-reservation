@@ -4,7 +4,6 @@ from jose import jwt
 
 from services.aws_service import get_aws_service
 
-
 # JWT 토큰 생성
 def create_jwt_token(user_id: str) -> str:
     secret = get_aws_service().get_jwt_secret()
