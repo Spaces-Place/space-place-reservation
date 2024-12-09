@@ -47,7 +47,6 @@ class ReservationService:
 
     # sub: 결제 준비 완료
     async def ready_approval(self, message: str):
-        print(message)
         try:
             data = json.loads(message)
 
@@ -72,7 +71,6 @@ class ReservationService:
 
     # sub: 예약 실패 처리
     async def ready_fail(self, message: str):
-        print(message)
         try:
             data = json.loads(message)
 
@@ -97,7 +95,6 @@ class ReservationService:
 
     # sub: 예약 성공 처리
     async def start_payment_approval(self, message: str):
-        print(message)
         try:
             data = json.loads(message)
 
