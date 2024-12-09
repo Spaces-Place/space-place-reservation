@@ -18,6 +18,7 @@ from utils.database_config import DatabaseConfig
 from utils.logger import Logger
 from utils.kafka_config import get_kafka
 from services.reservation_service import ReservationService
+from utils.logging_middleware import LoggingMiddleware
 
 
 async def start_payment_consumers():
@@ -52,6 +53,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan, title="예약 API", version="ver.1")
+app.add_middleware(LoggingMiddleware)
 
 app.include_router(reservation_router, prefix="/api/v1/reservations")
 

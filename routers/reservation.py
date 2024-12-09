@@ -5,7 +5,6 @@ from sqlmodel import select
 
 from enums.reservation_type import ReservationStatus
 from models.reservation import Reservation
-from routers.logging_router import LoggingAPIRoute
 from schemas.reservation import (
     ReservationRequest,
     OrderNumberRequest,
@@ -15,7 +14,7 @@ from utils.authenticate import userAuthenticate
 from utils.mysqldb import get_mysql_session
 
 
-reservation_router = APIRouter(tags=["예약"], route_class=LoggingAPIRoute)
+reservation_router = APIRouter(tags=["예약"])
 
 
 @reservation_router.get(
@@ -69,28 +68,23 @@ async def get_order_number(
     else:
         order_number = f"{order_prefix}0000"
 
-    new_reservation = None
+    reservation_data = {
+        "order_number": order_number,
+        "space_id": data.space_id,
+        "space_name": data.space_name,
+        "user_id": token_info["user_id"],
+        "user_name": data.user_name,
+        "r_status": ReservationStatus.PENDING,
+        "reservation_date": now
+    }
+
     if data.use_date:
-        new_reservation = Reservation(
-            order_number=order_number,
-            space_id=data.space_id,
-            space_name=data.space_name,
-            user_id=token_info["user_id"],
-            user_name=data.user_name,
-            use_date=data.use_date,
-            r_status=ReservationStatus.PENDING,
-        )
+        reservation_data["use_date"] = data.use_date
     else:
-        new_reservation = Reservation(
-            order_number=order_number,
-            space_id=data.space_id,
-            space_name=data.space_name,
-            user_id=token_info["user_id"],
-            user_name=data.user_name,
-            start_time=data.start_time,
-            end_time=data.end_time,
-            r_status=ReservationStatus.PENDING,
-        )
+        reservation_data["start_time"] = data.start_time
+        reservation_data["end_time"] = data.end_time
+
+    new_reservation = Reservation(**reservation_data)
 
     session.add(new_reservation)
     await session.commit()
