@@ -11,9 +11,9 @@ class Reservation(SQLModel, table=True):
     space_name: str
     user_id: str
     user_name: str
-    payment_id: int
+    payment_id: int | None = None
     r_status: ReservationStatus
-    reservation_date: datetime = Field(default_factory=datetime.now)
-    use_date: datetime
-    start_time: datetime
-    end_time: datetime
+    reservation_date: datetime = Field(default=datetime.now)
+    use_date: datetime | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
